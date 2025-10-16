@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptop Approval - Step 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('public/laptop_pic.jpg') no-repeat center center/cover;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 60px;
+            color: white;
+        }
+
+        .policy-box {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        h1 { color: #ffcc00; }
+
+        ul { text-align: left; margin: 20px auto; width: 85%; line-height: 1.6; }
+
+        .btn-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .share-btn, .copy-btn {
+            background: #ffcc00;
+            color: black;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .share-btn:hover, .copy-btn:hover { background: #ffaa00; }
+
+        .progress-container {
+            background: #444;
+            border-radius: 10px;
+            height: 25px;
+            margin: 20px auto;
+            width: 85%;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: #ffcc00;
+            height: 100%;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+
+        .validate-btn {
+            background: gray;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-top: 20px;
+            cursor: not-allowed;
+        }
+
+        .validate-btn.active {
+            background: #28a745;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="policy-box">
+    <h1>🎉 Congratulations!</h1>
+    <p>Your application has been <b style="color:lightgreen;">approved</b> to receive the <b>Student Support Laptop</b>.</p>
+
+    <ul>
+        <li><b>1.</b> Share this program with <b>5 friends</b> using WhatsApp or Copy Link.</li>
+        <li><b>2.</b> After sharing, click “Validate”.</li>
+        <li><b>3.</b> You will receive a confirmation email within 15 minutes.</li>
+    </ul>
+
+    <div class="btn-container">
+        <button class="share-btn" id="whatsappBtn">📱 WhatsApp</button>
+        <button class="copy-btn" id="copyBtn">📋 Copy Link</button>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <button type="button" onclick="sendEmail()">Validate & Send</button>
+
+</div>
+
+<script>
+
+    const whatsappBtn = document.getElementById("whatsappBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const progressBar = document.getElementById("progressBar");
+    const validateBtn = document.getElementById("validateBtn");
+
+    let shareCount = 0;
+
+    const shareLink = "https://your-laptop-program-link.com";
+    const shareMsg = "Apply now for the Student Laptop Scheme! Click here: " + shareLink;
+
+    whatsappBtn.addEventListener("click", () => {
+        const encodedMsg = encodeURIComponent(shareMsg);
+        window.open(`https://api.whatsapp.com/send?text=${encodedMsg}`, "_blank");
+        updateProgress();
+    });
+
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(shareMsg);
+        alert("Link copied! Share it with your friends.");
+        updateProgress();
+    });
+
+    function updateProgress() {
+        shareCount++;
+        if (shareCount <= 5) {
+            progressBar.style.width = (shareCount / 5) * 100 + "%";
+        }
+        if (shareCount === 5) {
+            validateBtn.disabled = false;
+            validateBtn.classList.add("active");
+            validateBtn.textContent = "✅ Validate Now";
+        }
+    }
+
+    // When Validate clicked — send email with student info
+    validateBtn.addEventListener("click", () => {
+        if (!validateBtn.classList.contains("active")) return;
+
+        // Retrieve stored user info from localStorage (saved from page_01)
+        const userData = JSON.parse(localStorage.getItem("studentData")) || {};
+
+        fetch("http://localhost:5000/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                alert("✅ Email sent! You’ll receive confirmation soon.");
+            })
+            .catch(err => alert("❌ Error sending email. Try again."));
+    });
+</script>
+
+</body>
+</html>
